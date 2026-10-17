@@ -1,0 +1,5 @@
+sistema
+sistema.exe
+*.o
+*.db
+.DS_Store

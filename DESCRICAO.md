@@ -15,7 +15,7 @@ em itálico quando preencher.
         - valor
         - descriçao
         - data (DD/MM/AAAA)
-        - categoria(nome)
+        - categoria (o sistema guarda o id; o usuário vê o nome)
         - codigo do gasto(id numerico)
     - Categoria
         - nome
@@ -39,19 +39,19 @@ em itálico quando preencher.
         - pede: a categoria(nome) e mes(numero) e ano(numero)
         - mostra: a lista de todos os gastos com a descriçao ao lado, o valor daquela categoria naquele mes/ano ordenado por data(dia/mes/ano) e indica qual gasto fez com que o total acumulado ultrapassasse o limite da categoria. 
     - Deletar categoria:
-        - pede: nome da categoria
+        - pede: o nome da categoria  
         - mostra: mensagem de sucesso ou de falha na operaçao
     - Atualizar gasto:
         - pede: o id do gasto, valor*, descriçao*, categoria*(nome)*, data(DD/MM/AAAA)*
         - mostra: se for sucesso mostra gasto atualizado ou mensagem de falha na operaçao
     - Deletar Gasto:
         - pede: o id do gasto
-        - mostra: retorna o gasto e a mensagem que foi deletado ou que deu falha 
+        - mostra: retorna o gasto e a mensagem dissendo se a operaçao deu certo ou deu falha 
     - Definir Limite da carteira:
         - pede: valor do limite
         - mostra: retorna o valor do limite e mensagem de sucesso ou de falha
     - Atualizar categoria:
-        - pede: o id da categoria, limite*, nome*
+        - pede: o nome da categoria, limite*, novo nome*
         - mostra: retorna a categoria atualizada ou a mensagem de falha na operaçao
 
     Atributos opcionais estao marcados com "*" 
@@ -60,15 +60,15 @@ em itálico quando preencher.
     - Não pode ter duas categoria com nomes iguais
     - os limites nao podem ser negativos
     - o valor dos gastos deve ser maior que O
-    - o sistema começa com uma categoria chamada "sem categoria" e que nao pode ser apagada. Essa categoria não pode ser renomeada. Seu limite pode ser mantido/atualizado conforme necessário, mas ela continua existindo.
-    - Quando uma categoria for deletada os gastos que estao nela serao alocados a categoria chamada "sem categoria". Os objetos Gasto permanecem os mesmos, apenas o nome da categoria associada a eles é alterado.
+    - o sistema começa com uma categoria chamada "sem categoria" e que nao pode ser apagada. Essa categoria não pode ser renomeada. essa categoria nao possui limite e nao pode ser atribuido limite a ela
+    - Quando uma categoria for deletada os gastos que estao nela serao alocados a categoria chamada "sem categoria". Os objetos Gasto permanecem os mesmos, apenas o id da categoria associada a eles é alterado.
     - A soma dos limites de todas as categorias pode ultrapassar ao limite total da carteira. o limite total da carteira tem caráter informativo, não gerando alertas automáticos.
     - Todo gasto e categoria criado tem seu id criado pelo sistema automaticamente e unico para cada tipo. São mantidos dois contadores separados (um para gastos e um para categorias).
-    - As operações com categoria devem ser feitas pelo nome. O id da categoria é usado apenas internamente pelo sistema. ao criar um gasto, e se for informada uma categoria que não existe, o gasto deve ser alocado à categoria "sem categoria".
+    - As operações com categoria devem ser feitas pelo nome. O id da categoria é usado apenas internamente pelo sistema. ao criar ou atualizar um gasto, e se for informada uma categoria que não existe, o gasto deve ser alocado à categoria "sem categoria".
     - A categoria "sem categoria" já existe desde o início e tem um id próprio (fixo). Não pode ser deletada.
 
 ## Quando algo dá errado
-    - Nas operaçoes de criaçao de gasto ou categoria se algum valor ou dado estiver fora do formato adequado o sistema deve avisar e nao prosseguir. (ex.: valor <= 0, limites negativos, data inválida no formato DD/MM/AAAA)
+    - Nas operaçoes de criaçao de gasto ou categoria se algum valor ou dado estiver fora do formato adequado o sistema deve avisar e nao prosseguir. (ex.: valor <= 0, limites negativos, data inválida no formato DD/MM/AAAA - o dia deve estar entre 1-31 e o mes de 1-12, respeitando a quantidade de dias de cada mes: em fevereiro o dia vai ate 28, ou ate 29 em ano bissexto) 
     - Se ao tentar criar ou atualizar a categoria para um nome que ja extiste o sistema deve avisar e nao prosseguir
     - Se tentar apagar um gasto ou categoria que nao existe o sistema deve avisar e nao prosseguir
     - Não é permitido apagar ou renomear a categoria "sem categoria"
@@ -107,6 +107,6 @@ em itálico quando preencher.
     U - Digita o comando de consultar gastos individuais de uma categoria no mês com os dados: Categoria: lazer, Mês: 10,
     Ano: 2026
     S - Exibe a listagem ordenada por data: 
-    10/10/2026 - Cinema: R$ 60,00 ID: 21
+    10/10/2026 - Cinema: R$ 60,00 ID: 2
     15/10/2026 - Show: R$ 160,00 [ID: 3] (Ultrapassou o limite da categoria de R$ 200,00)
     Total gasto em Lazer no mês 10/2026: R$ 220,00

@@ -14,7 +14,7 @@ em itálico quando preencher.
     - Gastos
         - valor
         - descriçao
-        - data (DD/MM)
+        - data (DD/MM/AAAA)
         - categoria
         - codigo do gasto(id numerico)
     - Categoria
@@ -27,22 +27,22 @@ em itálico quando preencher.
 ## O que dá para fazer
     As funcionalidade serão:
     - Adicionar novo gasto:,
-        - pede: valor do gasto, descriçao, data (DD/MM) e categoria.
+        - pede: valor do gasto, descriçao, data (DD/MM/AAAA) e categoria.
         - mostrar: resposta de sucesso ou falha no registro
     - Adicionar nova categoria:
         - pede: nome da nova categoria e limite*
         - mostra: resposta de sucesso ou falha na operaçao no registro
     - Consultar gastos por categoria no mes: 
-        - pede: o mes(numero)
+        - pede: o mes(numero) e o ano(numero)
         - mostra: a lista de todas as categorias e o valor gasto em cada e o limite da categoria
     - Consultar gastos individuais de uma categoria em determinado mes 
-        - pede: a categoria(numero) e mes 
-        - mostra: a lista de todos os gastos com a descriçao ao lado, o valor daquela categoria naquele mes e indica caso ultrapase o valor limite qual gasto que fez ultrapassar. E a lista sera ordenada por data
+        - pede: a categoria(nome) e mes(numero) e ano(numero)
+        - mostra: a lista de todos os gastos com a descriçao ao lado, o valor daquela categoria naquele mes/ano ordenado por data(dia/mes/ano) e indica caso ultrapase o valor limite qual gasto que fez ultrapassar. 
     - Deletar categoria:
         - pede: a categoria(numero)
         - mostra: mensagem de sucesso ou de falha na operaçao
     - Atualizar gasto:
-        - pede: o id do gasto, valor*, descriçao*, categoria*, data(DD/MM)*
+        - pede: o id do gasto, valor*, descriçao*, categoria*, data(DD/MM/AAAA)*
         - mostra: se for sucesso mostra gasto atualizado ou mensagem de falha na operaçao
     - Deletar Gasto:
         - pede: o id do gasto
@@ -58,54 +58,55 @@ em itálico quando preencher.
 
 ## Regras
     - Não pode ter duas categoria com nomes iguais
-    - os limites nao podem ser negativos 
-    - o sistema começa com uma categoria chamada sem categoria e que nao pode ser apagada
-    - Quando uma categoria for deletada os gastos que estao nela serao alocados a categoria chamada "sem categoria"
-    - A soma dos limites de todas as categorias pode ultrapassar ao limite total da carteira
-    - todo gasto e categoria criado tem seu id criado pelo sistema automaticamente e unico para cada, o id é um valor numerico incremental 
+    - os limites nao podem ser negativos
+    - o valor dos gastos deve ser maior que O
+    - o sistema começa com uma categoria chamada "sem categoria" e que nao pode ser apagada. Essa categoria não pode ser renomeada. Seu limite pode ser mantido/atualizado conforme necessário, mas ela continua existindo.
+    - Quando uma categoria for deletada os gastos que estao nela serao alocados a categoria chamada "sem categoria". Os objetos Gasto permanecem os mesmos, apenas o nome da categoria associada a eles é alterado.
+    - A soma dos limites de todas as categorias pode ultrapassar ao limite total da carteira. o limite total da carteira tem caráter informativo, não gerando alertas automáticos.
+    - Todo gasto e categoria criado tem seu id criado pelo sistema automaticamente e unico para cada tipo. São mantidos dois contadores separados (um para gastos e um para categorias).
+    - As operações com categoria devem ser feitas pelo nome.categoria é usado apenas internamente pelo sistema. ao criar um gasto, for informada uma categoria que não existe, o gasto deve ser alocado à categoria "sem categoria".
+    - A categoria "sem categoria" já existe desde o início e tem um id próprio (fixo). Não pode ser deletada.
 
 ## Quando algo dá errado
-   - Nas operaçoes de criaçao de gasto ou categoria se algum valor ou dado estiver fora do formato adequado o sistema deve avisar e nao prosseguir. 
-   - Se ao tentar criar ou atualizar a categoria para um nome que ja extiste o sistema deve avisar e nao prosseguir
-   - Se tentar apagar um gasto ou categoria que nao existe o sistema deve avisar e nao prosseguir
+    - Nas operaçoes de criaçao de gasto ou categoria se algum valor ou dado estiver fora do formato adequado o sistema deve avisar e nao prosseguir. (ex.: valor <= 0, limites negativos, data inválida no formato DD/MM/AAAA)
+    - Se ao tentar criar ou atualizar a categoria para um nome que ja extiste o sistema deve avisar e nao prosseguir
+    - Se tentar apagar um gasto ou categoria que nao existe o sistema deve avisar e nao prosseguir
+    - Não é permitido apagar ou renomear a categoria "sem categoria"
 
 
 ## Classes que eu imagino
-O sistema deve ter as seguintes classes:
-    - Gasto
-        - responsabilidade: armazenas as informaçoes de cada gasto
-
+    o sistema deve ter as seguintes classes:
+    - Gastos
+        - responsabilidade: armazenar as informações de cada gasto (id, valor, descrição, dia, mes, ano, nome da
     - Categoria
-        - responsabilidade: armazenar o limite definido dela e o nome
-    - gasto mensal
-        - responsabilidade: armazenar todos os gastos de determinado mes 
-    - Carteira
-        - responsabilidade: armazenar os gastos mensais de todos os meses adicionados, as categorias criadas, e as funcionalidades do sistema 
+        - responsabilidade: armazenar o id, o nome e o limite definido para cada categoria
+    -  Carteira
+        - responsabilidade: armazenar todos os gastos (em um único vetor), todas as categorias criadas (em um único vetor), o limite total da carteira, gerenciar os IDs automáticos separados e conter todas as funcionalidades do sistema   
 
-_Uma linha para cada classe: o nome e a responsabilidade dela. Não precisa
-ser a versão final; o plano com a IA pode mudar isso._
+
 
 ## Exemplo de uso
-U - o usuario entra no sistema
-U - digita o comando de criar uma categoria com os dados: aliementaçao de limite 500
-S - Devolve uma mensagem que a categoria foi criada com sucesso
-U - digita o comando de criar uma categoria com os dados: lazer de limite 200
-S - Devolve uma mensagem que a categoria foi criada com sucesso
-U - digita o comando de criar uma categoria com os dados: transporte de limite 300
-S - Devolve uma mensagem que a categoria foi criada com sucesso
-U - Digita o comando de criar um gasto com os dados: Categoria: Alimentação, Descrição: Sorvete, Valor: R$ 13,00, Data: 05/10
-S - Exibe: "Gasto registrado com sucesso!"
-U - Digita o comando de criar um gasto com os dados: Categoria: Lazer, Descrição: Cinema, Valor: R$ 60,00, Data: 10/10
-S - Exibe: "Gasto registrado com sucesso!"
-U - Digita o comando de criar um gasto com os dados: Categoria: Lazer, Descrição: Show, Valor: R$ 160,00, Data: 15/10
-S - Exibe: "Gasto registrado com sucesso!"
-U - Digita o comando de consultar gastos por categoria no mês: Mês: 10
-S - Exibe a lista consolidada do mês 10:
-Alimentação: R$ 13,00 / Limite: R$ 500,00
-Lazer: R$ 220,00 / Limite: R$ 200,00
-Transporte: R$ 0,00 / Limite: R$ 300,00
-U - Digita o comando de consultar gastos individuais de uma categoria no mês com os dados: Categoria: Lazer (ID: 2), Mês: 10
-S - Exibe a listagem ordenada por data:
-10/10 - Cinema: R$ 60,00 [ID: 2]
-15/10 - Show: R$ 160,00 [ID: 3] (Ultrapassou o limite da categoria de R$ 200,00)
-Total gasto em Lazer no mês: R$ 220,00
+    U - o usuario entra no sistema
+    U - digita o comando de criar uma categoria com os dados: alimentação de limite 500
+    S - Devolve uma mensagem que a categoria foi criada com sucesso
+    U - digita o comando de criar uma categoria com os dados: lazer de limite 200
+    S - Devolve uma mensagem que a categoria foi criada com sucesso
+    U - digita o comando de criar uma categoria com os dados: transporte de limite 300
+    S - Devolve uma mensagem que a categoria foi criada com sucesso
+    U - Digita o comando de criar um gasto com os dados: Categoria: alimentação, Descrição: Sorvete, Valor: R$ 13,00, Data: 05/10/2026
+    S - Exibe: "Gasto registrado com sucesso!"
+    U - Digita o comando de criar um gasto com os dados: Categoria: lazer, Descrição: Cinema, Valor: R$ 60,00, Data: 10/10/2026
+    S - Exibe: "Gasto registrado com sucesso!"
+    U - Digita o comando de criar um gasto com os dados: Categoria: lazer, Descrição: Show, Valor: R$ 160,00, Data: 15/10/2026
+    S - Exibe: "Gasto registrado com sucesso!"
+    U - Digita o comando de consultar gastos por categoria no mês: Mês: 10, Ano: 2026
+    S - Exibe a lista consolidada do mês 10/2026:
+    Alimentação: R$ 13,00 / Limite: R$ 500,00
+    Lazer: R$ 220,00 / Limite: R$ 200,00
+    Transporte: R$ 0,00 / Limite: R$ 300,00
+    U - Digita o comando de consultar gastos individuais de uma categoria no mês com os dados: Categoria: lazer, Mês: 10,
+    Ano: 2026
+    S - Exibe a listagem ordenada por data: 
+    10/10/2026 - Cinema: R$ 60,00 LID: 21
+    15/10/2026 - Show: R$ 160,00 [ID: 3] (Ultrapassou o limite da categoria de R$ 200,00)
+    Total gasto em Lazer no mês 10/2026: R$ 220,00

@@ -144,11 +144,8 @@ número de dias de um mês, a validação de data usa uma tabelinha simples:
 
 ### Interface — `src/main.cpp`
 
-- menu numerado no `cin`;
-- um funzinho de leitura que **não derruba o programa** se o usuário digitar
-  texto onde deveria ser número (o enunciado alerta que isso derruba muitos
-  menus): lê a linha, tenta converter, e se falhar mostra aviso e volta ao
-  menu;
+- loop lendo comandos em texto da entrada padrão;
+- interpreta os comandos conforme os nomes usados na `DESCRICAO.md`;
 - toda mensagem de sucesso/falha é escrita aqui, nunca nas classes.
 
 O comando de compilação do `README.md` (`src/*.cpp -Iinclude`) já pega
@@ -171,18 +168,17 @@ src/*.cpp -Iinclude -o sistema`), rodando e um commit.
 **Como testar:** rodar o `./sistema` e conferir a ordem das datas e o id
 encontrado. É o passo que ensina os dois operadores antes de virar sistema.
 
-### Etapa 2 — `Categoria`, esqueleto da `Carteira` e menu mínimo
+### Etapa 2 — `Categoria`, esqueleto da `Carteira` e comandos básicos
 
 **Arquivos:** `include/Categoria.hpp`, `src/Categoria.cpp`,
 `include/Carteira.hpp`, `src/Carteira.cpp`, `src/main.cpp`.
 
 - `Categoria` completa.
 - `Carteira` com os containers, contadores, construtor que cria "sem
-  categoria" (sem limite), e só dois métodos: `adicionarCategoria` e
-  `adicionarCategoria` falhando em nome repetido/limite negativo (e
-  `listarCategorias` só para conferir).
-- Menu com: 1) criar categoria, 2) listar categorias, 0) sair.
-- Leitura robusta de número desde já.
+  categoria" (sem limite), e só dois métodos: `adicionarCategoria` (falha
+  se nome repetido ou limite < 0) e `listarCategorias` só para conferir.
+- Interface com comandos em texto: `criar categoria <nome> <limite>`,
+  `listar categorias`, `sair`.
 
 **Como testar:** `exemplos/cenario1.txt` — cria "alimentação" 500, tenta
 criar de novo (deve falhar), cria "lazer" 200, cria com limite -10 (deve
@@ -197,8 +193,8 @@ falhar), lista. A "sem categoria" já aparece na lista.
   bissexto) e a regra da categoria inexistente → "sem categoria" (o nome é
   convertido para id aqui dentro).
 - `deletarGasto` com `std::find` + `operator==`.
-- Menu ganha: 3) registrar gasto, 4) deletar gasto, 5) listar gastos
-  (mostrando o nome da categoria resolvido pelo id).
+- Interface ganha: `criar gasto ...`, `deletar gasto <id>`,
+  `listar gastos` (mostrando o nome da categoria resolvido pelo id).
 
 **Como testar:** `exemplos/cenario2.txt` — registra com categoria que não
 existe (cai em "sem categoria"), valor 0 (falha), 31/04/2026 (falha, abril
@@ -231,7 +227,8 @@ atualiza um gasto de categoria.
 - `consultarCategoria(nome, mes, ano)` → filtra os gastos da categoria no
   mês para um `vector<Gasto>`, `std::sort` por `operator<`, acumula e marca
   o id do gasto que ultrapassou o limite, devolve `DetalheMes`.
-- Menu ganha: 6) consulta consolidada, 7) consulta detalhada.
+- Interface ganha: `consultar gastos por categoria no mes <mes> <ano>`
+  e `consultar gastos individuais de uma categoria no mes <categoria> <mes> <ano>`.
 
 **Como testar:** `exemplos/cenario4.txt` reproduzindo o "Exemplo de uso"
 do `DESCRICAO.md` e conferindo linha a linha a saída esperada (inclusive o
@@ -241,9 +238,8 @@ do `DESCRICAO.md` e conferindo linha a linha a saída esperada (inclusive o
 
 **Arquivos:** altera `Carteira.*` e `main.cpp`.
 
-- `definirLimiteTotal` (rejeita negativo) e a opção no menu mostrando o
-  limite total (informativo, sem alertas — regra da descrição).
-- Teste dos casos ruins de leitura: digitar texto onde o menu espera número.
+- `definirLimiteTotal` (rejeita negativo) e comando `definir limite total <valor>`.
+- Tratar comandos inválidos (mostrar mensagem de falha, sem quebrar).
 - Rodar **todos** os `exemplos/` de novo, do primeiro ao último, para
   garantir que a etapa nova não quebrou a antiga.
 

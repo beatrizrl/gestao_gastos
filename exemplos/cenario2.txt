@@ -1,0 +1,10 @@
+criar categoria alimentação 500
+criar gasto 13.50 Sorvete 05/10/2026 alimentação
+criar gasto 25 Passeio 06/10/2026 viagem
+criar gasto 0 Café 07/10/2026 alimentação
+criar gasto 12 Almoço 31/04/2026 alimentação
+criar gasto 12 Janta 30/02/2026 alimentação
+criar gasto 30 Lapas 29/02/2028 alimentação
+deletar gasto 99
+listar gastos
+sair

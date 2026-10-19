@@ -16,11 +16,20 @@ private:
     int proximoIdGasto;
     int proximoIdCategoria;
 
+    int diasDoMes(int mes, int ano) const;
+
 public:
     Carteira();
 
     bool adicionarCategoria(const std::string &nome, double limite);
     void listarCategorias(std::ostream &out) const;
+
+    bool adicionarGasto(double valor, const std::string &descricao,
+                        int dia, int mes, int ano,
+                        const std::string &nomeCategoria);
+    bool deletarGasto(int id, Gasto &copia);
+    void listarGastos(std::ostream &out) const;
+    std::string nomeDaCategoria(int id) const;
 };
 
 #endif

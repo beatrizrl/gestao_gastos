@@ -38,6 +38,12 @@ int main() {
             continue;
         }
 
+        // Comando: listar gastos
+        if (linha == "listar gastos") {
+            carteira.listarGastos(std::cout);
+            continue;
+        }
+
         // Comando: criar categoria <nome> <limite>
         // Ex.: "criar categoria alimentação 500" ou com nome sem espaços? DESCRICAO mostra nomes simples
         // Mas vamos parsear: primeiro token "criar", segundo "categoria", resto nome+limite
@@ -82,6 +88,108 @@ int main() {
                 std::cout << "Categoria criada com sucesso" << std::endl;
             } else {
                 std::cout << "Falha ao criar categoria" << std::endl;
+            }
+            continue;
+        }
+
+        // Comando: criar gasto <valor> <descrição> <dia/mes/ano> <categoria>
+        // A data é o primeiro token que contém '/', então descrição e
+        // categoria podem ter espaços.
+        if (cmd1 == "criar" && cmd2 == "gasto") {
+            std::string prefixo = "criar gasto ";
+            if (linha.size() < prefixo.size()) {
+                std::cout << "Falha ao criar gasto: dados incompletos" << std::endl;
+                continue;
+            }
+            std::string resto = linha.substr(prefixo.size());
+            trim(resto);
+
+            size_t esp1 = resto.find(' ');
+            if (esp1 == std::string::npos) {
+                std::cout << "Falha ao criar gasto: dados incompletos" << std::endl;
+                continue;
+            }
+            std::string valorStr = resto.substr(0, esp1);
+            std::string depoisValor = resto.substr(esp1 + 1);
+            trim(depoisValor);
+
+            size_t posBarra = depoisValor.find('/');
+            if (posBarra == std::string::npos) {
+                std::cout << "Falha ao criar gasto: data ausente (use dia/mes/ano)" << std::endl;
+                continue;
+            }
+            size_t iniData = depoisValor.rfind(' ', posBarra);
+            if (iniData == std::string::npos) {
+                iniData = 0;
+            } else {
+                iniData = iniData + 1;
+            }
+            size_t fimData = depoisValor.find(' ', posBarra);
+            std::string descricao = depoisValor.substr(0, iniData);
+            std::string dataStr;
+            std::string categoria;
+            if (fimData == std::string::npos) {
+                dataStr = depoisValor.substr(iniData);
+            } else {
+                dataStr = depoisValor.substr(iniData, fimData - iniData);
+                categoria = depoisValor.substr(fimData + 1);
+            }
+            trim(descricao);
+            trim(dataStr);
+            trim(categoria);
+            if (categoria.empty()) {
+                std::cout << "Falha ao criar gasto: categoria ausente" << std::endl;
+                continue;
+            }
+
+            double valor = 0.0;
+            std::stringstream ssValor(valorStr);
+            if (!(ssValor >> valor)) {
+                std::cout << "Falha ao criar gasto: valor invalido" << std::endl;
+                continue;
+            }
+
+            int dia = 0, mes = 0, ano = 0;
+            char barra1 = 0, barra2 = 0;
+            std::stringstream ssData(dataStr);
+            if (!(ssData >> dia >> barra1 >> mes >> barra2 >> ano)
+                || barra1 != '/' || barra2 != '/') {
+                std::cout << "Falha ao criar gasto: data invalida (use dia/mes/ano)" << std::endl;
+                continue;
+            }
+
+            if (carteira.adicionarGasto(valor, descricao, dia, mes, ano, categoria)) {
+                std::cout << "Gasto registrado com sucesso!" << std::endl;
+            } else {
+                std::cout << "Falha ao registrar gasto" << std::endl;
+            }
+            continue;
+        }
+
+        // Comando: deletar gasto <id>
+        if (cmd1 == "deletar" && cmd2 == "gasto") {
+            std::string idStr;
+            ss >> idStr;
+            int id = 0;
+            std::stringstream ssi(idStr);
+            if (idStr.empty() || !(ssi >> id)) {
+                std::cout << "Falha ao deletar gasto: id invalido" << std::endl;
+                continue;
+            }
+
+            Gasto removido;
+            if (carteira.deletarGasto(id, removido)) {
+                std::cout << "Gasto deletado com sucesso" << std::endl;
+                std::cout << "  id=" << removido.getId()
+                          << " " << removido.getDia() << "/" << removido.getMes()
+                          << "/" << removido.getAno()
+                          << " " << removido.getDescricao()
+                          << " R$ " << removido.getValor()
+                          << " categoria: "
+                          << carteira.nomeDaCategoria(removido.getIdCategoria())
+                          << std::endl;
+            } else {
+                std::cout << "Falha ao deletar gasto: id nao encontrado" << std::endl;
             }
             continue;
         }

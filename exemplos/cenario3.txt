@@ -1,0 +1,16 @@
+criar categoria alimentação 500
+criar categoria lazer 200
+criar gasto 13.50 Sorvete 05/10/2026 alimentação
+criar gasto 45 Cinema 06/10/2026 lazer
+criar gasto 30 Presente 07/10/2026 lazer
+listar gastos
+deletar categoria lazer
+listar gastos
+deletar categoria sem categoria
+atualizar categoria sem categoria limite 100
+atualizar gasto 2 valor 55 descricao Cinemark data 06/10/2026 categoria lazer
+atualizar gasto 3 categoria alimentação
+atualizar categoria alimentação nome comida
+listar categorias
+listar gastos
+sair

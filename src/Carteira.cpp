@@ -103,6 +103,97 @@ bool Carteira::deletarGasto(int id, Gasto &copia) {
     return true;
 }
 
+bool Carteira::atualizarGasto(int id, double valor, const std::string &descricao,
+                              int dia, int mes, int ano,
+                              const std::string &nomeCategoria) {
+    Gasto chave;
+    chave.setId(id);
+
+    std::list<Gasto>::iterator it = std::find(gastos.begin(), gastos.end(), chave);
+    if (it == gastos.end()) {
+        return false;
+    }
+    if (valor <= 0.0) {
+        return false;
+    }
+    if (descricao.empty()) {
+        return false;
+    }
+    if (mes < 1 || mes > 12) {
+        return false;
+    }
+    if (dia < 1 || dia > diasDoMes(mes, ano)) {
+        return false;
+    }
+
+    int idCategoria = 0;
+    std::map<std::string, Categoria>::const_iterator itCat =
+        categorias.find(nomeCategoria);
+    if (itCat != categorias.end()) {
+        idCategoria = itCat->second.getId();
+    }
+
+    it->setValor(valor);
+    it->setDescricao(descricao);
+    it->setDia(dia);
+    it->setMes(mes);
+    it->setAno(ano);
+    it->setIdCategoria(idCategoria);
+    return true;
+}
+
+bool Carteira::atualizarCategoria(const std::string &nome,
+                                  const std::string &novoNome, double novoLimite) {
+    if (nome == "sem categoria") {
+        return false;
+    }
+    if (novoLimite < 0.0) {
+        return false;
+    }
+
+    std::map<std::string, Categoria>::iterator it = categorias.find(nome);
+    if (it == categorias.end()) {
+        return false;
+    }
+
+    if (novoNome == nome) {
+        it->second.setLimite(novoLimite);
+        return true;
+    }
+
+    if (categorias.find(novoNome) != categorias.end()) {
+        return false;
+    }
+
+    Categoria atualizada = it->second;
+    categorias.erase(it);
+    categorias[novoNome] = atualizada;
+    categorias[novoNome].setNome(novoNome);
+    categorias[novoNome].setLimite(novoLimite);
+    return true;
+}
+
+bool Carteira::deletarCategoria(const std::string &nome) {
+    if (nome == "sem categoria") {
+        return false;
+    }
+
+    std::map<std::string, Categoria>::iterator it = categorias.find(nome);
+    if (it == categorias.end()) {
+        return false;
+    }
+
+    int idApagada = it->second.getId();
+    categorias.erase(it);
+
+    for (std::list<Gasto>::iterator g = gastos.begin(); g != gastos.end(); ++g) {
+        if (g->getIdCategoria() == idApagada) {
+            g->setIdCategoria(0);
+        }
+    }
+    return true;
+}
+
 void Carteira::listarGastos(std::ostream &out) const {
     if (gastos.empty()) {
         out << "Nenhum gasto registrado" << std::endl;
@@ -128,4 +219,28 @@ std::string Carteira::nomeDaCategoria(int id) const {
         }
     }
     return "desconhecida";
+}
+
+bool Carteira::gastoPorId(int id, Gasto &copia) const {
+    Gasto chave;
+    chave.setId(id);
+
+    std::list<Gasto>::const_iterator it =
+        std::find(gastos.begin(), gastos.end(), chave);
+    if (it == gastos.end()) {
+        return false;
+    }
+
+    copia = *it;
+    return true;
+}
+
+bool Carteira::categoriaPorNome(const std::string &nome, Categoria &copia) const {
+    std::map<std::string, Categoria>::const_iterator it = categorias.find(nome);
+    if (it == categorias.end()) {
+        return false;
+    }
+
+    copia = it->second;
+    return true;
 }

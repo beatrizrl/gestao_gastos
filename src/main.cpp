@@ -194,6 +194,239 @@ int main() {
             continue;
         }
 
+        // Comando: atualizar gasto <id> [valor <v>] [descricao <texto>] [data <d/m/a>] [categoria <nome>]
+        if (cmd1 == "atualizar" && cmd2 == "gasto") {
+            std::string idStr;
+            ss >> idStr;
+            int id = 0;
+            std::stringstream ssi(idStr);
+            if (idStr.empty() || !(ssi >> id)) {
+                std::cout << "Falha ao atualizar gasto: id invalido" << std::endl;
+                continue;
+            }
+
+            Gasto atual;
+            if (!carteira.gastoPorId(id, atual)) {
+                std::cout << "Falha ao atualizar gasto: id nao encontrado" << std::endl;
+                continue;
+            }
+
+            double valor = atual.getValor();
+            std::string descricao = atual.getDescricao();
+            int dia = atual.getDia();
+            int mes = atual.getMes();
+            int ano = atual.getAno();
+            std::string nomeCat = carteira.nomeDaCategoria(atual.getIdCategoria());
+
+            std::vector<std::string> tokens;
+            std::string palavra;
+            while (ss >> palavra) {
+                tokens.push_back(palavra);
+            }
+
+            bool erro = false;
+            for (size_t i = 0; i < tokens.size(); ++i) {
+                if (tokens[i] == "valor") {
+                    if (i + 1 >= tokens.size()) {
+                        std::cout << "Falha ao atualizar gasto: valor ausente" << std::endl;
+                        erro = true;
+                        break;
+                    }
+                    std::stringstream ssValor(tokens[i + 1]);
+                    if (!(ssValor >> valor)) {
+                        std::cout << "Falha ao atualizar gasto: valor invalido" << std::endl;
+                        erro = true;
+                        break;
+                    }
+                    ++i;
+                } else if (tokens[i] == "data") {
+                    if (i + 1 >= tokens.size()) {
+                        std::cout << "Falha ao atualizar gasto: data ausente" << std::endl;
+                        erro = true;
+                        break;
+                    }
+                    int d = 0, m = 0, a = 0;
+                    char barra1 = 0, barra2 = 0;
+                    std::stringstream ssData(tokens[i + 1]);
+                    if (!(ssData >> d >> barra1 >> m >> barra2 >> a)
+                        || barra1 != '/' || barra2 != '/') {
+                        std::cout << "Falha ao atualizar gasto: data invalida (use dia/mes/ano)" << std::endl;
+                        erro = true;
+                        break;
+                    }
+                    dia = d;
+                    mes = m;
+                    ano = a;
+                    ++i;
+                } else if (tokens[i] == "descricao" || tokens[i] == "categoria") {
+                    std::string valorCampo;
+                    size_t j = i + 1;
+                    while (j < tokens.size() && tokens[j] != "valor"
+                           && tokens[j] != "descricao" && tokens[j] != "data"
+                           && tokens[j] != "categoria") {
+                        if (!valorCampo.empty()) {
+                            valorCampo += " ";
+                        }
+                        valorCampo += tokens[j];
+                        ++j;
+                    }
+                    if (valorCampo.empty()) {
+                        std::cout << "Falha ao atualizar gasto: " << tokens[i] << " ausente" << std::endl;
+                        erro = true;
+                        break;
+                    }
+                    if (tokens[i] == "descricao") {
+                        descricao = valorCampo;
+                    } else {
+                        nomeCat = valorCampo;
+                    }
+                    i = j - 1;
+                } else {
+                    std::cout << "Falha ao atualizar gasto: campo '" << tokens[i] << "' invalido" << std::endl;
+                    erro = true;
+                    break;
+                }
+            }
+            if (erro) {
+                continue;
+            }
+
+            if (carteira.atualizarGasto(id, valor, descricao, dia, mes, ano, nomeCat)) {
+                std::cout << "Gasto atualizado com sucesso" << std::endl;
+            } else {
+                std::cout << "Falha ao atualizar gasto: dados invalidos" << std::endl;
+            }
+            continue;
+        }
+
+        // Comando: atualizar categoria <nome...> [limite <v>] [nome <novoNome>]
+        if (cmd1 == "atualizar" && cmd2 == "categoria") {
+            std::string prefixoCat = "atualizar categoria ";
+            if (linha.size() < prefixoCat.size()) {
+                std::cout << "Falha ao atualizar categoria: nome ausente" << std::endl;
+                continue;
+            }
+            std::string restoCat = linha.substr(prefixoCat.size());
+            trim(restoCat);
+
+            std::vector<std::string> tokensCat;
+            std::stringstream ssCat(restoCat);
+            std::string palavraCat;
+            while (ssCat >> palavraCat) {
+                tokensCat.push_back(palavraCat);
+            }
+
+            std::string nomeCat, novoNomeCat;
+            size_t iCat = 0;
+            for (; iCat < tokensCat.size(); ++iCat) {
+                if (tokensCat[iCat] == "limite" || tokensCat[iCat] == "nome") {
+                    break;
+                }
+                if (!nomeCat.empty()) {
+                    nomeCat += " ";
+                }
+                nomeCat += tokensCat[iCat];
+            }
+            if (nomeCat.empty()) {
+                std::cout << "Falha ao atualizar categoria: nome ausente" << std::endl;
+                continue;
+            }
+            if (nomeCat == "sem categoria") {
+                std::cout << "Falha ao atualizar categoria: 'sem categoria' nao pode ser alterada" << std::endl;
+                continue;
+            }
+
+            Categoria catAtual;
+            if (!carteira.categoriaPorNome(nomeCat, catAtual)) {
+                std::cout << "Falha ao atualizar categoria: nome nao encontrado" << std::endl;
+                continue;
+            }
+            novoNomeCat = catAtual.getNome();
+            double novoLimiteCat = catAtual.getLimite();
+
+            bool erroCat = false;
+            for (; iCat < tokensCat.size(); ++iCat) {
+                if (tokensCat[iCat] == "limite") {
+                    if (iCat + 1 >= tokensCat.size()) {
+                        std::cout << "Falha ao atualizar categoria: limite ausente" << std::endl;
+                        erroCat = true;
+                        break;
+                    }
+                    std::stringstream ssLimite(tokensCat[iCat + 1]);
+                    if (!(ssLimite >> novoLimiteCat)) {
+                        std::cout << "Falha ao atualizar categoria: limite invalido" << std::endl;
+                        erroCat = true;
+                        break;
+                    }
+                    ++iCat;
+                } else if (tokensCat[iCat] == "nome") {
+                    novoNomeCat.clear();
+                    for (size_t j = iCat + 1; j < tokensCat.size(); ++j) {
+                        if (!novoNomeCat.empty()) {
+                            novoNomeCat += " ";
+                        }
+                        novoNomeCat += tokensCat[j];
+                    }
+                    if (novoNomeCat.empty()) {
+                        std::cout << "Falha ao atualizar categoria: novo nome ausente" << std::endl;
+                        erroCat = true;
+                        break;
+                    }
+                    iCat = tokensCat.size();
+                } else {
+                    std::cout << "Falha ao atualizar categoria: campo '" << tokensCat[iCat] << "' invalido" << std::endl;
+                    erroCat = true;
+                    break;
+                }
+            }
+            if (erroCat) {
+                continue;
+            }
+            if (novoLimiteCat < 0.0) {
+                std::cout << "Falha ao atualizar categoria: limite invalido" << std::endl;
+                continue;
+            }
+            if (novoNomeCat != nomeCat) {
+                Categoria outra;
+                if (carteira.categoriaPorNome(novoNomeCat, outra)) {
+                    std::cout << "Falha ao atualizar categoria: nome ja existente" << std::endl;
+                    continue;
+                }
+            }
+
+            if (carteira.atualizarCategoria(nomeCat, novoNomeCat, novoLimiteCat)) {
+                std::cout << "Categoria atualizada com sucesso" << std::endl;
+            } else {
+                std::cout << "Falha ao atualizar categoria" << std::endl;
+            }
+            continue;
+        }
+
+        // Comando: deletar categoria <nome...>
+        if (cmd1 == "deletar" && cmd2 == "categoria") {
+            std::string prefixoDel = "deletar categoria ";
+            if (linha.size() < prefixoDel.size()) {
+                std::cout << "Falha ao deletar categoria: nome ausente" << std::endl;
+                continue;
+            }
+            std::string nomeDel = linha.substr(prefixoDel.size());
+            trim(nomeDel);
+            if (nomeDel.empty()) {
+                std::cout << "Falha ao deletar categoria: nome ausente" << std::endl;
+                continue;
+            }
+            if (nomeDel == "sem categoria") {
+                std::cout << "Falha ao deletar categoria: 'sem categoria' nao pode ser deletada" << std::endl;
+                continue;
+            }
+            if (carteira.deletarCategoria(nomeDel)) {
+                std::cout << "Categoria deletada com sucesso" << std::endl;
+            } else {
+                std::cout << "Falha ao deletar categoria: nome nao encontrado" << std::endl;
+            }
+            continue;
+        }
+
         std::cout << "Comando desconhecido" << std::endl;
     }
 

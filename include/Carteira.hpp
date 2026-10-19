@@ -28,8 +28,16 @@ public:
                         int dia, int mes, int ano,
                         const std::string &nomeCategoria);
     bool deletarGasto(int id, Gasto &copia);
+    bool atualizarGasto(int id, double valor, const std::string &descricao,
+                        int dia, int mes, int ano,
+                        const std::string &nomeCategoria);
+    bool atualizarCategoria(const std::string &nome,
+                            const std::string &novoNome, double novoLimite);
+    bool deletarCategoria(const std::string &nome);
     void listarGastos(std::ostream &out) const;
     std::string nomeDaCategoria(int id) const;
+    bool gastoPorId(int id, Gasto &copia) const;
+    bool categoriaPorNome(const std::string &nome, Categoria &copia) const;
 };
 
 #endif

@@ -53,6 +53,7 @@ public:
 
     std::vector<ResumoCategoria> consultarMes(int mes, int ano) const;
     DetalheMes consultarCategoria(const std::string& nome, int mes, int ano) const;
+    bool definirLimiteTotal(double valor);
 };
 
 #endif

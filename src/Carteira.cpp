@@ -311,3 +311,11 @@ DetalheMes Carteira::consultarCategoria(const std::string &nome, int mes, int an
     dm.total = acumulado;
     return dm;
 }
+
+bool Carteira::definirLimiteTotal(double valor) {
+    if (valor < 0.0) {
+        return false;
+    }
+    limiteTotal = valor;
+    return true;
+}

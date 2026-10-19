@@ -427,6 +427,28 @@ int main() {
             continue;
         }
 
+        // Comando: definir limite total <valor>
+        if (cmd1 == "definir" && cmd2 == "limite") {
+            std::string terceiro, valorStr;
+            ss >> terceiro >> valorStr;
+            if (terceiro != "total" || valorStr.empty()) {
+                std::cout << "Comando desconhecido" << std::endl;
+                continue;
+            }
+            double valor = 0.0;
+            std::stringstream ssValor(valorStr);
+            if (!(ssValor >> valor)) {
+                std::cout << "Falha ao definir limite total: valor invalido" << std::endl;
+                continue;
+            }
+            if (carteira.definirLimiteTotal(valor)) {
+                std::cout << "Limite total definido com sucesso" << std::endl;
+            } else {
+                std::cout << "Falha ao definir limite total: valor negativo" << std::endl;
+            }
+            continue;
+        }
+
         // Comando: consultar gastos por categoria no mes <mes> <ano>
         // ou: consultar gastos individuais de uma categoria no mes <categoria> <mes> <ano>
         if (cmd1 == "consultar" && cmd2 == "gastos") {

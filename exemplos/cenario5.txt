@@ -1,0 +1,17 @@
+criar categoria alimentação 500
+criar categoria lazer 200
+definir limite total 1000
+definir limite total -50
+definir limite total
+definir saldo 100
+comando que nao existe
+criar gasto 120,50 almoço 5/10/2026 alimentação
+criar gasto 80 janta 10/10/2026 alimentação
+criar gasto 250 show 12/10/2026 lazer
+criar gasto 30 cafe 15/10/2026 xyz
+consultar gastos por categoria no mes 10 2026
+consultar gastos individuais de uma categoria no mes lazer 10 2026
+consultar gastos individuais de uma categoria no mes alimentação 10 2026
+listar gastos
+listar categorias
+sair

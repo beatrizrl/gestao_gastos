@@ -8,6 +8,18 @@
 #include "Gasto.hpp"
 #include "Categoria.hpp"
 
+struct ResumoCategoria {
+    std::string categoria;
+    double total;
+    double limite;
+};
+
+struct DetalheMes {
+    std::vector<Gasto> gastos;
+    double total;
+    int idEstouro;
+};
+
 class Carteira {
 private:
     std::list<Gasto> gastos;
@@ -38,6 +50,9 @@ public:
     std::string nomeDaCategoria(int id) const;
     bool gastoPorId(int id, Gasto &copia) const;
     bool categoriaPorNome(const std::string &nome, Categoria &copia) const;
+
+    std::vector<ResumoCategoria> consultarMes(int mes, int ano) const;
+    DetalheMes consultarCategoria(const std::string& nome, int mes, int ano) const;
 };
 
 #endif

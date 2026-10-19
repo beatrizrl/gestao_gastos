@@ -427,6 +427,91 @@ int main() {
             continue;
         }
 
+        // Comando: consultar gastos por categoria no mes <mes> <ano>
+        // ou: consultar gastos individuais de uma categoria no mes <categoria> <mes> <ano>
+        if (cmd1 == "consultar" && cmd2 == "gastos") {
+            std::string restoConsulta = linha;
+            std::string prefixo1 = "consultar gastos por categoria no mes ";
+            if (restoConsulta.find(prefixo1) == 0) {
+                std::string dados = restoConsulta.substr(prefixo1.size());
+                trim(dados);
+                int mes = 0, ano = 0;
+                std::stringstream ssd(dados);
+                if (!(ssd >> mes >> ano)) {
+                    std::cout << "Falha ao consultar gastos: dados invalidos" << std::endl;
+                    continue;
+                }
+                std::vector<ResumoCategoria> res = carteira.consultarMes(mes, ano);
+                for (std::vector<ResumoCategoria>::size_type i = 0; i < res.size(); ++i) {
+                    std::cout << "Categoria: " << res[i].categoria
+                              << " | Total: R$ " << res[i].total;
+                    if (res[i].limite < 0.0) {
+                        std::cout << " | Limite: sem limite" << std::endl;
+                    } else {
+                        std::cout << " | Limite: R$ " << res[i].limite << std::endl;
+                    }
+                }
+                continue;
+            }
+
+            std::string prefixo2 = "consultar gastos individuais de uma categoria no mes ";
+            if (restoConsulta.find(prefixo2) == 0) {
+                std::string dados = restoConsulta.substr(prefixo2.size());
+                trim(dados);
+                if (dados.empty()) {
+                    std::cout << "Falha ao consultar gastos: dados invalidos" << std::endl;
+                    continue;
+                }
+                size_t espUlt = dados.rfind(' ');
+                if (espUlt == std::string::npos) {
+                    std::cout << "Falha ao consultar gastos: dados invalidos" << std::endl;
+                    continue;
+                }
+                std::string anoStr = dados.substr(espUlt + 1);
+                std::string meio = dados.substr(0, espUlt);
+                trim(meio);
+                trim(anoStr);
+                size_t espUlt2 = meio.rfind(' ');
+                if (espUlt2 == std::string::npos) {
+                    std::cout << "Falha ao consultar gastos: dados invalidos" << std::endl;
+                    continue;
+                }
+                std::string mesStr = meio.substr(espUlt2 + 1);
+                std::string nomeCat = meio.substr(0, espUlt2);
+                trim(nomeCat);
+                trim(mesStr);
+
+                int mes = 0, ano = 0;
+                std::stringstream ssm(mesStr);
+                std::stringstream ssa(anoStr);
+                if (!(ssm >> mes) || !(ssa >> ano)) {
+                    std::cout << "Falha ao consultar gastos: dados invalidos" << std::endl;
+                    continue;
+                }
+
+                DetalheMes dm = carteira.consultarCategoria(nomeCat, mes, ano);
+                for (std::vector<Gasto>::size_type i = 0; i < dm.gastos.size(); ++i) {
+                    const Gasto &g = dm.gastos[i];
+                    std::cout << "id=" << g.getId()
+                              << " " << g.getDia() << "/" << g.getMes() << "/" << g.getAno()
+                              << " " << g.getDescricao()
+                              << " R$ " << g.getValor() << std::endl;
+                }
+                std::cout << "Total: R$ " << dm.total << std::endl;
+                if (dm.idEstouro != -1) {
+                    Categoria cCat;
+                    if (carteira.categoriaPorNome(nomeCat, cCat)) {
+                        std::cout << "(Ultrapassou o limite da categoria de R$ "
+                                  << cCat.getLimite() << ",00)" << std::endl;
+                    }
+                }
+                continue;
+            }
+
+            std::cout << "Comando desconhecido" << std::endl;
+            continue;
+        }
+
         std::cout << "Comando desconhecido" << std::endl;
     }
 

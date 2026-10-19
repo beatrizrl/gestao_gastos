@@ -244,3 +244,70 @@ bool Carteira::categoriaPorNome(const std::string &nome, Categoria &copia) const
     copia = it->second;
     return true;
 }
+
+std::vector<ResumoCategoria> Carteira::consultarMes(int mes, int ano) const {
+    std::vector<ResumoCategoria> res;
+    for (std::map<std::string, Categoria>::const_iterator it = categorias.begin(); it != categorias.end(); ++it) {
+        const Categoria &cat = it->second;
+        double total = 0.0;
+        for (std::list<Gasto>::const_iterator g = gastos.begin(); g != gastos.end(); ++g) {
+            if (g->getMes() == mes && g->getAno() == ano && g->getIdCategoria() == cat.getId()) {
+                total += g->getValor();
+            }
+        }
+        ResumoCategoria r;
+        r.categoria = it->first;
+        r.total = total;
+        if (cat.getId() == 0) {
+            r.limite = -1.0;
+        } else {
+            r.limite = cat.getLimite();
+        }
+        res.push_back(r);
+    }
+    return res;
+}
+
+DetalheMes Carteira::consultarCategoria(const std::string &nome, int mes, int ano) const {
+    DetalheMes dm;
+    dm.total = 0.0;
+    dm.idEstouro = -1;
+
+    int idCat = -1;
+    Categoria copiaCat;
+    if (categoriaPorNome(nome, copiaCat)) {
+        idCat = copiaCat.getId();
+    } else {
+        idCat = 0;
+    }
+
+    std::vector<Gasto> filtrados;
+    for (std::list<Gasto>::const_iterator g = gastos.begin(); g != gastos.end(); ++g) {
+        if (g->getMes() == mes && g->getAno() == ano && g->getIdCategoria() == idCat) {
+            filtrados.push_back(*g);
+        }
+    }
+
+    std::sort(filtrados.begin(), filtrados.end());
+
+    bool temLimite = (idCat != 0);
+    double limiteCat = 0.0;
+    if (temLimite) {
+        limiteCat = copiaCat.getLimite();
+    }
+
+    double acumulado = 0.0;
+    for (std::vector<Gasto>::size_type i = 0; i < filtrados.size(); ++i) {
+        acumulado += filtrados[i].getValor();
+        if (!temLimite) {
+            continue;
+        }
+        if (dm.idEstouro == -1 && acumulado > limiteCat) {
+            dm.idEstouro = filtrados[i].getId();
+        }
+    }
+
+    dm.gastos = filtrados;
+    dm.total = acumulado;
+    return dm;
+}
